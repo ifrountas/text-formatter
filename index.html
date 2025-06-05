@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Formatter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom animations */
+        .btn-clicked {
+            transform: scale(0.95);
+            transition: transform 0.1s ease;
+        }
+        
+        .success-flash {
+            background-color: #10b981 !important;
+            transition: background-color 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen py-8">
+    <div class="container mx-auto px-4 max-w-4xl">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">Text Formatter</h1>
+            <p class="text-gray-600">Transform your text with ease</p>
+        </div>
+
+        <!-- Main Content -->
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <!-- Text Area -->
+            <div class="mb-6">
+                <label for="textInput" class="block text-sm font-medium text-gray-700 mb-2">
+                    Paste your text here:
+                </label>
+                <textarea 
+                    id="textInput" 
+                    class="w-full p-4 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 resize-none"
+                    rows="8"
+                    placeholder="Enter your text here to format it..."
+                ></textarea>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+                <button 
+                    onclick="bmwpApplyGreeklish()" 
+                    class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 hover:shadow-md active:transform active:scale-95"
+                >
+                    🇬🇷 Greeklish
+                </button>
+                
+                <button 
+                    onclick="bmwpApplyLowercase()" 
+                    class="bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 hover:shadow-md active:transform active:scale-95"
+                >
+                    📝 Lowercase
+                </button>
+                
+                <button 
+                    onclick="bmwpApplyUppercase()" 
+                    class="bg-purple-500 hover:bg-purple-600 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 hover:shadow-md active:transform active:scale-95"
+                >
+                    📢 UPPERCASE
+                </button>
+                
+                <button 
+                    onclick="bmwpApplyCapitalized()" 
+                    class="bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 hover:shadow-md active:transform active:scale-95"
+                >
+                    ✨ Capitalized
+                </button>
+                
+                <button 
+                    onclick="bmwpResetText()" 
+                    class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 hover:shadow-md active:transform active:scale-95"
+                >
+                    🔄 Reset
+                </button>
+                
+                <button 
+                    onclick="bmwpCopyText()" 
+                    id="copyBtn"
+                    class="bg-indigo-500 hover:bg-indigo-600 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 hover:shadow-md active:transform active:scale-95"
+                >
+                    📋 Copy
+                </button>
+            </div>
+
+            <!-- Status Message -->
+            <div id="statusMessage" class="text-center text-sm text-gray-500 min-h-[20px]"></div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8 text-gray-500 text-sm">
+            <p>Created with ❤️ for easy text formatting</p>
+        </div>
+    </div>
+
+    <script>
+        // Store original text for reset functionality
+        let bmwpOriginalText = '';
+        
+        // Get textarea element
+        const bmwpGetTextArea = () => document.getElementById('textInput');
+        
+        // Get status message element
+        const bmwpGetStatusElement = () => document.getElementById('statusMessage');
+        
+        // Show status message
+        const bmwpShowStatus = (message, isSuccess = false) => {
+            const statusEl = bmwpGetStatusElement();
+            statusEl.textContent = message;
+            statusEl.className = `text-center text-sm min-h-[20px] ${isSuccess ? 'text-green-600' : 'text-gray-500'}`;
+            
+            if (isSuccess) {
+                setTimeout(() => {
+                    statusEl.textContent = '';
+                    statusEl.className = 'text-center text-sm text-gray-500 min-h-[20px]';
+                }, 3000);
+            }
+        };
+        
+        // Store original text when user starts typing
+        bmwpGetTextArea().addEventListener('input', function() {
+            if (!bmwpOriginalText) {
+                bmwpOriginalText = this.value;
+            }
+        });
+        
+        // Greek to Greeklish conversion mapping
+        const bmwpGreekToGreeklishMap = {
+            'α': 'a', 'Α': 'A', 'β': 'b', 'Β': 'B', 'γ': 'g', 'Γ': 'G',
+            'δ': 'd', 'Δ': 'D', 'ε': 'e', 'Ε': 'E', 'ζ': 'z', 'Ζ': 'Z',
+            'η': 'i', 'Η': 'I', 'θ': 'th', 'Θ': 'Th', 'ι': 'i', 'Ι': 'I',
+            'κ': 'k', 'Κ': 'K', 'λ': 'l', 'Λ': 'L', 'μ': 'm', 'Μ': 'M',
+            'ν': 'n', 'Ν': 'N', 'ξ': 'ks', 'Ξ': 'Ks', 'ο': 'o', 'Ο': 'O',
+            'π': 'p', 'Π': 'P', 'ρ': 'r', 'Ρ': 'R', 'σ': 's', 'Σ': 'S',
+            'ς': 's', 'τ': 't', 'Τ': 'T', 'υ': 'y', 'Υ': 'Y', 'φ': 'f',
+            'Φ': 'F', 'χ': 'x', 'Χ': 'X', 'ψ': 'ps', 'Ψ': 'Ps', 'ω': 'o',
+            'Ω': 'O', 'ά': 'a', 'Ά': 'A', 'έ': 'e', 'Έ': 'E', 'ή': 'i',
+            'Ή': 'I', 'ί': 'i', 'Ί': 'I', 'ό': 'o', 'Ό': 'O', 'ύ': 'y',
+            'Ύ': 'Y', 'ώ': 'o', 'Ώ': 'O', 'ΐ': 'i', 'ΰ': 'y', 'ϊ': 'i'
+        };
+        
+        // Convert Greek text to Greeklish
+        const bmwpConvertToGreeklish = (text) => {
+            return text.replace(/[αβγδεζηθικλμνξοπρστυφχψωάέήίόύώΐΰςΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩΆΈΉΊΌΎΏϊ]/g, (match) => {
+                return bmwpGreekToGreeklishMap[match] || match;
+            });
+        };
+        
+        // Apply Greeklish transformation
+        const bmwpApplyGreeklish = () => {
+            const textarea = bmwpGetTextArea();
+            const text = textarea.value;
+            
+            if (!text.trim()) {
+                bmwpShowStatus('Please enter some text first');
+                return;
+            }
+            
+            textarea.value = bmwpConvertToGreeklish(text);
+            bmwpShowStatus('Text converted to Greeklish successfully!', true);
+        };
+        
+        // Apply lowercase transformation
+        const bmwpApplyLowercase = () => {
+            const textarea = bmwpGetTextArea();
+            const text = textarea.value;
+            
+            if (!text.trim()) {
+                bmwpShowStatus('Please enter some text first');
+                return;
+            }
+            
+            textarea.value = text.toLowerCase();
+            bmwpShowStatus('Text converted to lowercase successfully!', true);
+        };
+        
+        // Apply uppercase transformation
+        const bmwpApplyUppercase = () => {
+            const textarea = bmwpGetTextArea();
+            const text = textarea.value;
+            
+            if (!text.trim()) {
+                bmwpShowStatus('Please enter some text first');
+                return;
+            }
+            
+            textarea.value = text.toUpperCase();
+            bmwpShowStatus('Text converted to UPPERCASE successfully!', true);
+        };
+        
+        // Apply capitalized transformation
+        const bmwpApplyCapitalized = () => {
+            const textarea = bmwpGetTextArea();
+            const text = textarea.value;
+            
+            if (!text.trim()) {
+                bmwpShowStatus('Please enter some text first');
+                return;
+            }
+            
+            textarea.value = text.replace(/\b\w/g, (match) => match.toUpperCase());
+            bmwpShowStatus('Text capitalized successfully!', true);
+        };
+        
+        // Reset text to original
+        const bmwpResetText = () => {
+            const textarea = bmwpGetTextArea();
+            
+            if (!bmwpOriginalText) {
+                textarea.value = '';
+                bmwpShowStatus('Text area cleared');
+                return;
+            }
+            
+            textarea.value = bmwpOriginalText;
+            bmwpShowStatus('Text reset to original successfully!', true);
+        };
+        
+        // Copy text to clipboard
+        const bmwpCopyText = () => {
+            const textarea = bmwpGetTextArea();
+            const text = textarea.value;
+            
+            if (!text.trim()) {
+                bmwpShowStatus('No text to copy');
+                return;
+            }
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const copyBtn = document.getElementById('copyBtn');
+                const originalText = copyBtn.textContent;
+                
+                copyBtn.textContent = '✅ Copied!';
+                copyBtn.classList.add('success-flash');
+                
+                setTimeout(() => {
+                    copyBtn.textContent = originalText;
+                    copyBtn.classList.remove('success-flash');
+                }, 1500);
+                
+                bmwpShowStatus('Text copied to clipboard successfully!', true);
+            }).catch(() => {
+                bmwpShowStatus('Failed to copy text. Please try selecting and copying manually.');
+            });
+        };
+    </script>
+</body>
+</html>
